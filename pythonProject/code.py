@@ -1,13 +1,26 @@
 import numpy as np
 
 
-def perform_svd(matrix):
-    U, sigma, VT = np.linalg.svd(matrix)
+def custom_svd(matrix):
+    # Compute A^T * A
+    ATA = np.dot(matrix.T, matrix)
 
-    Sigma = np.zeros((matrix.shape[0], matrix.shape[1]))
-    np.fill_diagonal(Sigma, sigma)
+    eigenvalues, V = np.linalg.eigh(ATA)
 
-    reconstructed_matrix = np.dot(U, np.dot(Sigma, VT))
+    sorted_indices = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[sorted_indices]
+    V = V[:, sorted_indices]
+
+    singular_values = np.sqrt(eigenvalues)
+
+    Sigma = np.zeros((matrix.shape[0], matrix.shape[1]), dtype=float)
+    np.fill_diagonal(Sigma, singular_values)
+
+    U = np.zeros((matrix.shape[0], matrix.shape[0]), dtype=float)
+    for i in range(len(singular_values)):
+        U[:, i] = np.dot(matrix, V[:, i]) / singular_values[i]
+
+    reconstructed_matrix = np.dot(U, np.dot(Sigma, V.T))
 
     print("Original Matrix:")
     print(matrix)
@@ -16,12 +29,12 @@ def perform_svd(matrix):
     print("\nSigma Matrix:")
     print(Sigma)
     print("\nVT Matrix:")
-    print(VT)
+    print(V.T)
     print("\nReconstructed Matrix:")
     print(reconstructed_matrix)
 
-    return U, Sigma, VT
+    return U, Sigma, V.T
 
 
 matrix = np.array([[1, 2], [3, 4], [5, 6]])
-U, Sigma, VT = perform_svd(matrix)
+U, Sigma, VT = custom_svd(matrix)
