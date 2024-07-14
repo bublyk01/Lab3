@@ -1,4 +1,23 @@
 import numpy as np
+import pandas as pd
+
+file_path = 'ratings.csv'
+df = pd.read_csv(file_path)
+
+ratings_matrix = df.pivot(index='userId', columns='movieId', values='rating')
+
+ratings_matrix = ratings_matrix.dropna(thresh=200, axis=0)
+ratings_matrix = ratings_matrix.dropna(thresh=100, axis=1)
+
+average_mark = 2.5
+
+ratings_matrix_filled = ratings_matrix.fillna(average_mark)
+
+R = ratings_matrix_filled.values
+
+user_ratings_mean = np.mean(R, axis=1)
+
+R_demeaned = R - user_ratings_mean.reshape(-1, 1)
 
 
 def custom_svd(matrix):
@@ -36,5 +55,4 @@ def custom_svd(matrix):
     return U, Sigma, V.T
 
 
-matrix = np.array([[1, 2], [3, 4], [5, 6]])
-U, Sigma, VT = custom_svd(matrix)
+U, Sigma, VT = custom_svd(R_demeaned)
