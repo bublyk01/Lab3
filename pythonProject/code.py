@@ -49,5 +49,29 @@ original_nan_mask = ratings_matrix.isna()
 
 preds_df_with_nans = preds_df.where(original_nan_mask, np.nan)
 
-print("\nPredicted Ratings:")
-print(preds_df_with_nans)
+
+def get_top_10_recommendations(user_id, preds_df, original_ratings_df, num_recommendations=10):
+    user_row_number = user_id - 1
+    sorted_user_predictions = preds_df.iloc[user_row_number].sort_values(ascending=False)
+
+    user_data = original_ratings_df[original_ratings_df.userId == user_id]
+
+    print("User's sorted predictions:")
+    print(sorted_user_predictions.head(15))
+
+    print("\nUser's full data:")
+    print(user_data.head())
+
+    recommendations = pd.DataFrame(sorted_user_predictions).reset_index()
+    recommendations.columns = ['movieId', 'Predictions']
+    recommendations = recommendations[~recommendations['movieId'].isin(user_data['movieId'])]
+    recommendations = recommendations.sort_values('Predictions', ascending=False).iloc[:num_recommendations, :]
+
+    return recommendations
+
+
+user_id = 1
+top_10_recommendations = get_top_10_recommendations(user_id, preds_df_with_nans, df)
+
+print("\nMovie recommendations for ID {}:".format(user_id))
+print(top_10_recommendations[['movieId']])
