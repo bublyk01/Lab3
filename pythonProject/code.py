@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.sparse.linalg import svds
+import matplotlib.pyplot as plt
 
 file_path = 'ratings.csv'
 df = pd.read_csv(file_path)
@@ -19,7 +20,6 @@ R_demeaned = R - user_ratings_mean.reshape(-1, 1)
 
 
 def custom_svd(matrix):
-    # Compute A^T * A
     ATA = np.dot(matrix.T, matrix)
 
     eigenvalues, V = np.linalg.eigh(ATA)
@@ -37,19 +37,6 @@ def custom_svd(matrix):
     for i in range(len(singular_values)):
         U[:, i] = np.dot(matrix, V[:, i]) / singular_values[i] if singular_values[i] != 0 else 0
 
-    reconstructed_matrix = np.dot(U, np.dot(Sigma, V.T))
-
-    print("Original Matrix:")
-    print(matrix)
-    print("\nU Matrix:")
-    print(U)
-    print("\nSigma Matrix:")
-    print(Sigma)
-    print("\nVT Matrix:")
-    print(V.T)
-    print("\nReconstructed Matrix:")
-    print(reconstructed_matrix)
-
     return U, Sigma, V.T
 
 
@@ -57,12 +44,41 @@ U_custom, Sigma_custom, VT_custom = custom_svd(R_demeaned)
 
 k = 3
 U_scipy, sigma_scipy, VT_scipy = svds(R_demeaned, k=k)
+Sigma_scipy = np.zeros((R_demeaned.shape[0], R_demeaned.shape[1]), dtype=float)
+np.fill_diagonal(Sigma_scipy[:k, :k], sigma_scipy)
 
-Sigma_scipy = np.diag(sigma_scipy)
+print("Custom SVD - U Matrix:")
+print(U_custom)
+print("\nCustom SVD - Sigma Matrix:")
+print(Sigma_custom)
+print("\nCustom SVD - VT Matrix:")
+print(VT_custom)
 
-print("\nU Matrix with scipy:")
+print("\nScipy SVD - U Matrix:")
 print(U_scipy)
-print("\nSigma Matrix with scipy:")
+print("\nScipy SVD - Sigma Matrix:")
 print(Sigma_scipy)
-print("\nVT Matrix with scipy:")
+print("\nScipy SVD - VT Matrix:")
 print(VT_scipy)
+
+fig = plt.figure()
+ax = fig.add_subplot(121, projection='3d')
+
+num_users = min(20, U_custom.shape[0])
+xs_custom = U_custom[:num_users, 0]
+ys_custom = U_custom[:num_users, 1]
+zs_custom = U_custom[:num_users, 2]
+
+ax.scatter(xs_custom, ys_custom, zs_custom, c=range(num_users), cmap='viridis')
+ax.set_title("Non-scipy SVD")
+
+ax = fig.add_subplot(122, projection='3d')
+
+xs_scipy = U_scipy[:num_users, 0]
+ys_scipy = U_scipy[:num_users, 1]
+zs_scipy = U_scipy[:num_users, 2]
+
+ax.scatter(xs_scipy, ys_scipy, zs_scipy, c=range(num_users), cmap='viridis')
+ax.set_title("Scipy SVD")
+
+plt.show()
