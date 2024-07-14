@@ -61,24 +61,25 @@ print(Sigma_scipy)
 print("\nScipy SVD - VT Matrix:")
 print(VT_scipy)
 
-fig = plt.figure()
-ax = fig.add_subplot(121, projection='3d')
+fig = plt.figure(figsize=(14, 7))
+ax1 = fig.add_subplot(121, projection='3d')
 
-num_users = min(20, U_custom.shape[0])
-xs_custom = U_custom[:num_users, 0]
-ys_custom = U_custom[:num_users, 1]
-zs_custom = U_custom[:num_users, 2]
-
-ax.scatter(xs_custom, ys_custom, zs_custom, c=range(num_users), cmap='viridis')
-ax.set_title("Non-scipy SVD")
-
-ax = fig.add_subplot(122, projection='3d')
-
+num_users = min(20, U_scipy.shape[0])
 xs_scipy = U_scipy[:num_users, 0]
 ys_scipy = U_scipy[:num_users, 1]
 zs_scipy = U_scipy[:num_users, 2]
 
-ax.scatter(xs_scipy, ys_scipy, zs_scipy, c=range(num_users), cmap='viridis')
-ax.set_title("Scipy SVD")
+ax1.scatter(xs_scipy, ys_scipy, zs_scipy, c=range(num_users), cmap='viridis')
+ax1.set_title('Users (Scipy SVD)')
+
+ax2 = fig.add_subplot(122, projection='3d')
+
+num_movies = min(20, VT_scipy.shape[1])
+xs_movies = VT_scipy[0, :num_movies]
+ys_movies = VT_scipy[1, :num_movies]
+zs_movies = VT_scipy[2, :num_movies]
+
+ax2.scatter(xs_movies, ys_movies, zs_movies, c=range(num_movies), cmap='viridis')
+ax2.set_title('Movies (Scipy SVD)')
 
 plt.show()
