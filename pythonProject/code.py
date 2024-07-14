@@ -7,8 +7,8 @@ df = pd.read_csv(file_path)
 
 ratings_matrix = df.pivot(index='userId', columns='movieId', values='rating')
 
-ratings_matrix = ratings_matrix.dropna(thresh=200, axis=0)
-ratings_matrix = ratings_matrix.dropna(thresh=100, axis=1)
+ratings_matrix = ratings_matrix.dropna(thresh=20, axis=0)
+ratings_matrix = ratings_matrix.dropna(thresh=50, axis=1)
 
 average_mark = 2.5
 ratings_matrix_filled = ratings_matrix.fillna(average_mark)
@@ -16,7 +16,6 @@ ratings_matrix_filled = ratings_matrix.fillna(average_mark)
 R = ratings_matrix_filled.values
 
 user_ratings_mean = np.mean(R, axis=1)
-
 R_demeaned = R - user_ratings_mean.reshape(-1, 1)
 
 
@@ -37,7 +36,7 @@ def custom_svd(matrix):
 
 U_custom, Sigma_custom, VT_custom = custom_svd(R_demeaned)
 
-k = 5
+k = 3
 U_scipy, sigma_scipy, VT_scipy = svds(R_demeaned, k=k)
 
 Sigma_scipy = np.diag(sigma_scipy)
@@ -46,5 +45,9 @@ all_user_predicted_ratings = np.dot(np.dot(U_scipy, Sigma_scipy), VT_scipy) + us
 
 preds_df = pd.DataFrame(all_user_predicted_ratings, columns=ratings_matrix.columns, index=ratings_matrix.index)
 
+original_nan_mask = ratings_matrix.isna()
+
+preds_df_with_nans = preds_df.where(original_nan_mask, np.nan)
+
 print("\nPredicted Ratings:")
-print(preds_df)
+print(preds_df_with_nans)
