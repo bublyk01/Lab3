@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.sparse.linalg import svds
 
 file_path = 'ratings.csv'
 df = pd.read_csv(file_path)
@@ -52,4 +53,16 @@ def custom_svd(matrix):
     return U, Sigma, V.T
 
 
-U, Sigma, VT = custom_svd(R_demeaned)
+U_custom, Sigma_custom, VT_custom = custom_svd(R_demeaned)
+
+k = 3
+U_scipy, sigma_scipy, VT_scipy = svds(R_demeaned, k=k)
+
+Sigma_scipy = np.diag(sigma_scipy)
+
+print("\nU Matrix with scipy:")
+print(U_scipy)
+print("\nSigma Matrix with scipy:")
+print(Sigma_scipy)
+print("\nVT Matrix with scipy:")
+print(VT_scipy)
