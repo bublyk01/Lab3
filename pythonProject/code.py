@@ -10,13 +10,10 @@ ratings_matrix = ratings_matrix.dropna(thresh=200, axis=0)
 ratings_matrix = ratings_matrix.dropna(thresh=100, axis=1)
 
 average_mark = 2.5
-
 ratings_matrix_filled = ratings_matrix.fillna(average_mark)
 
 R = ratings_matrix_filled.values
-
 user_ratings_mean = np.mean(R, axis=1)
-
 R_demeaned = R - user_ratings_mean.reshape(-1, 1)
 
 
@@ -30,14 +27,14 @@ def custom_svd(matrix):
     eigenvalues = eigenvalues[sorted_indices]
     V = V[:, sorted_indices]
 
-    singular_values = np.sqrt(eigenvalues)
+    singular_values = np.sqrt(np.maximum(eigenvalues, 0))
 
     Sigma = np.zeros((matrix.shape[0], matrix.shape[1]), dtype=float)
     np.fill_diagonal(Sigma, singular_values)
 
     U = np.zeros((matrix.shape[0], matrix.shape[0]), dtype=float)
     for i in range(len(singular_values)):
-        U[:, i] = np.dot(matrix, V[:, i]) / singular_values[i]
+        U[:, i] = np.dot(matrix, V[:, i]) / singular_values[i] if singular_values[i] != 0 else 0
 
     reconstructed_matrix = np.dot(U, np.dot(Sigma, V.T))
 
